@@ -25,8 +25,8 @@ const contenido = `> Generado automáticamente por scripts/gate-1.sh. No editar 
 ## Umbrales
 
 Los umbrales se ajustan al baseline de cada fase y deben subir hasta líneas ≥ 80 y ramas ≥ 70.
-Valores actuales en \`vite.config.js\`: líneas 33, ramas 37, funciones 28 y sentencias 31.
-Si la cobertura baja de esos valores, \`gate-1.sh\` y \`gate-2.sh\` fallan.
+Valores actuales en \`vite.config.js\`: líneas 52, ramas 48, funciones 47 y sentencias 50.
+Si la cobertura baja de esos valores, \`gate-1.sh\`, \`gate-2.sh\` y \`gate-3.sh\` fallan.
 `;
 
 fs.writeFileSync("docs/cobertura.md", contenido);

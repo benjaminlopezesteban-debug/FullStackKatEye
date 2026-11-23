@@ -17,8 +17,6 @@
    precio, imagen) se obtiene del catálogo con detallarCarrito(): así
    cumplimos la regla 5 de forma natural, porque ni siquiera se guarda. */
 
-import { obtenerProductoPorId } from "./productos";
-
 export const CLAVE_CARRITO = "kateye_carrito";
 export const MAX_UNIDADES_POR_PRODUCTO = 10;
 
@@ -58,9 +56,9 @@ export function sanearCarrito(guardado) {
     if (!Array.isArray(guardado)) return [];
 
     return guardado.reduce((lista, item) => {
-        const producto = item?.producto ?? obtenerProductoPorId(item?.id);
+        const producto = item?.producto;
         const cantidad = Math.floor(Number(item?.cantidad));
-        if (!producto || !(cantidad >= 1)) return lista;       // regla 6
+        if (!producto?.id || !(cantidad >= 1)) return lista;   // regla 6
         return agregarItem(lista, producto.id, cantidad, producto).carrito; // reglas 1, 2 y 4
     }, []);
 }
@@ -71,7 +69,7 @@ export function sanearCarrito(guardado) {
    Si el producto ya no existe, esa línea se descarta (regla 6). */
 export function detallarCarrito(carrito) {
     return carrito.reduce((lineas, item) => {
-        const p = item.producto ?? obtenerProductoPorId(item.id);
+        const p = item.producto;
         if (!p) return lineas;
         const precio = p.precioFinal ?? p.precio;
         const precioAnterior = p.precioOferta != null

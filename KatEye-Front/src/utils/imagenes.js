@@ -8,7 +8,7 @@ import { urlAsset } from "../api/urlAsset";
    Solución: import.meta.glob le pide a Vite que procese TODAS las imágenes
    de src/assets (en cualquier subcarpeta) y nos entregue un objeto
    { ruta: urlFinal }. Luego lo reindexamos por nombre de archivo, para que
-   productos.js solo tenga que guardar "Base líquida mate.jpg". */
+   los DTO de blog solo tengan que guardar "Base líquida mate.jpg". */
 
 export const IMG_PLACEHOLDER =
     "data:image/svg+xml;utf8," +

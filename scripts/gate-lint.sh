@@ -23,7 +23,9 @@ log "Prettier (archivos nuevos y de configuración)"
     package.json vite.config.js eslint.config.js src/test/setup.js
     src/test/mocks src/test/contract src/test/Productos.test.jsx
     src/test/DetalleProducto.test.jsx src/test/client.test.js
-    src/test/urlAsset.test.js src/utils/producto.js
+    src/test/urlAsset.test.js src/test/Header.test.jsx src/test/Inicio.test.jsx
+    src/test/Blogs.test.jsx src/test/Blog.test.jsx src/test/Registro.test.jsx
+    src/utils/producto.js
   )
   if [ -d src/api ]; then
     targets+=(src/api)

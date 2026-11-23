@@ -4,7 +4,7 @@
 |---|---|
 | **Fase** | F3 |
 | **Gate** | G3 |
-| **Estado** | Planificada |
+| **Estado** | Cerrada (commit pendiente) |
 | **Documento maestro** | `../../planificacion_desarrollo.md` |
 
 ## 1. Contexto
@@ -90,14 +90,14 @@ Resultado esperado:
 
 ## 6. Registro de ejecución
 
-- **Fecha:**
-- **Autor:**
-- **Comandos ejecutados:**
-- **Resultado:**
-- **Desviaciones:**
+- **Fecha:** 2026-11-22
+- **Autor:** Benjamín López
+- **Comandos ejecutados:** `npm run test:coverage`; `scripts/check-deuda.sh 3`; `scripts/gate-3.sh`; `scripts/sync-progreso.sh`.
+- **Resultado:** G3 en verde (`exit 0`). Anti-mocks vacío, contract test verde, 79 tests verdes, cobertura 52.32/48.18/48.03/50.77 y build correcto. Evidencia en `.gates/gate-3.ok`.
+- **Desviaciones:** `SesionProvider`/`usuarios.js` siguen simulados (DT-07, F4); checkout/pagos simulados (DT-14, F5); N+1 de imágenes/ofertas (DT-13, F6); OpenAPI pendiente (DT-06).
 - **Memoria:** `docs/memoria/mm_devFase3.md`
 - **Commit sugerido:** `refactor: migra catálogo, blogs y ubicación a la API`
-- **Commit realizado:**
+- **Commit realizado:** pendiente (lo realiza el usuario)
 
 ## 7. Pendientes para la siguiente fase
 
@@ -106,4 +106,4 @@ Resultado esperado:
 - Verificar que los filtros se envían al servidor y no se recalculan en el cliente.
 - Confirmar que el `grep` anti-mocks no encuentra MSW ni `http.*` en `src/` fuera de tests.
 - Confirmar que el contract test falla si se reintroduce MSW en runtime (verificar manualmente y revertir).
-- Confirmar que los espejos recibieron los cambios de la fase.
+- Confirmar que los espejos quedaron sincronizados con F2+F3 y que el usuario los commitea y pushea.

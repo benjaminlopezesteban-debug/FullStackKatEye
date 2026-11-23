@@ -31,6 +31,10 @@
 | `/pagos/{numero}/reintentar` | POST | Path `numero`, query `correo` opcional, `Idempotency-Key` | `201` `PagoResponse` | `404` pedido/pago, `409` estado inválido |
 | `/pedidos/{numero}` | GET | Path `numero`, Bearer JWT o `correo` de invitado | `200` `PedidoResponse` | `404` pedido no encontrado |
 
+### Imágenes de blog
+
+`EntradaBlogResponse.imagen` es un **nombre de archivo** (por ejemplo `Crema Hidratante Facial.jpg`), no una URL. El frontend lo resuelve con `resolverImagen` desde `src/assets/` y usa `IMG_PLACEHOLDER` si el archivo no existe. La URL de producto sí viene resuelta en `ProductoResponse.imagenUrl`.
+
 ## 2. Matriz de contract tests
 
 | Endpoint | Método | Request | Response OK | Errores | Test que lo cubre | Gate que lo exige |
@@ -39,10 +43,10 @@
 | `/productos/{id}` | GET | `id` | `ProductoResponse` | `404` | `DetalleProducto.test.jsx` y `ProductoContractTest` | G2 |
 | `/productos/{id}/relacionados` | GET | `id` | `List<ProductoResponse>` | `404` | `DetalleProducto.test.jsx` | G2 |
 | `/categorias` | GET | — | `List<CategoriaResponse>` | `500` | `Productos.test.jsx` | G2 / G3 |
-| `/blogs` | GET | — | `List<EntradaBlogResponse>` | `500` | `blogs.test.js` | G3 |
-| `/blogs/{slug}` | GET | `slug` | `EntradaBlogResponse` | `404` | `blogs.test.js` | G3 |
-| `/regiones` | GET | — | `List<RegionResponse>` | `500` | `regiones.test.js` | G3 |
-| `/regiones/{codigo}/comunas` | GET | `codigo` | `List<ComunaResponse>` | `404` | `regiones.test.js` | G3 |
+| `/blogs` | GET | — | `List<EntradaBlogResponse>` | `500` | `Blogs.test.jsx` | G3 |
+| `/blogs/{slug}` | GET | `slug` | `EntradaBlogResponse` | `404` | `Blog.test.jsx` | G3 |
+| `/regiones` | GET | — | `List<RegionResponse>` | `500` | `Registro.test.jsx` | G3 |
+| `/regiones/{codigo}/comunas` | GET | `codigo` | `List<ComunaResponse>` | `404` | `Registro.test.jsx` | G3 |
 | `/auth/registro` | POST | `RegistroRequest` | `TokenResponse` | `400`, `409` | `sesion.registro.test.js` + validación backend | G4 |
 | `/auth/login` | POST | `LoginRequest` | `TokenResponse` | `401` | `sesion.login.test.js` | G4 |
 | `/auth/logout` | POST | Bearer JWT | `{ mensaje }` | `401` | `sesion.logout.test.js` | G4 |
