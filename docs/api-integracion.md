@@ -47,11 +47,11 @@
 | `/blogs/{slug}` | GET | `slug` | `EntradaBlogResponse` | `404` | `Blog.test.jsx` | G3 |
 | `/regiones` | GET | — | `List<RegionResponse>` | `500` | `Registro.test.jsx` | G3 |
 | `/regiones/{codigo}/comunas` | GET | `codigo` | `List<ComunaResponse>` | `404` | `Registro.test.jsx` | G3 |
-| `/auth/registro` | POST | `RegistroRequest` | `TokenResponse` | `400`, `409` | `sesion.registro.test.js` + validación backend | G4 |
-| `/auth/login` | POST | `LoginRequest` | `TokenResponse` | `401` | `sesion.login.test.js` | G4 |
-| `/auth/logout` | POST | Bearer JWT | `{ mensaje }` | `401` | `sesion.logout.test.js` | G4 |
-| `/usuarios/me` | GET | Bearer JWT | `UsuarioResponse` | `401` | `sesion.hidratacion.test.js` | G4 |
-| `/contacto` | POST | `MensajeContactoRequest` | `MensajeContactoResponse` | `400` | `contacto.test.js` + validación backend | G4 |
+| `/auth/registro` | POST | `RegistroRequest` | `TokenResponse` | `400`, `409` | `SesionProvider.test.jsx` y `ValidacionRequestTest` | G4 |
+| `/auth/login` | POST | `LoginRequest` | `TokenResponse` | `400`, `401` | `IniciarSesion.test.jsx`, `SesionProvider.test.jsx` y `ValidacionRequestTest` | G4 |
+| `/auth/logout` | POST | Bearer JWT | `{ mensaje }` | `401` | `SesionProvider.test.jsx` | G4 |
+| `/usuarios/me` | GET | Bearer JWT | `UsuarioResponse` | `401` | `SesionProvider.test.jsx` | G4 |
+| `/contacto` | POST | `MensajeContactoRequest` (correo opcional) | `MensajeContactoResponse` | `400` | `Contacto.test.jsx` y `ValidacionRequestTest` | G4 |
 | `/carritos/validar` | POST | Ítems | Carrito validado | `400`, `409` | `carrito.validar.test.js` | G5 |
 | `/checkout` | POST | `CheckoutRequest` + `Idempotency-Key` | `CheckoutResponse` | `400`, `409` | `contract.checkout.test.js` | G5 |
 | `/pagos/simular` | POST | `PagoRequest` + `Idempotency-Key` | `PagoResponse` | `400`, `404` | `contract.pago.test.js` | G5 |
@@ -82,6 +82,16 @@ curl -i -X OPTIONS http://localhost:8080/api/v1/productos \
   -H "Access-Control-Request-Method: GET"
 ```
 
-## 4. OpenAPI
+## 4. Sesión y JWT
+
+- **Dominios:** el registro acepta `@duoc.cl`, `@profesor.duoc.cl` y `@gmail.com`. El login acepta además `@kateye.cl` para la cuenta administradora sembrada.
+- **Almacenamiento:** token en `localStorage` con la clave `kateye_token` (decisión D9). No se guarda la contraseña ni el perfil completo.
+- **Expiración:** `TokenResponse.expiraEn` informa la vigencia en segundos; el backend firma con `JWT_SECRET`.
+- **401:** el interceptor de `src/api/client.js` borra el token y emite `kateye:sesion-expirada`; `SesionProvider` limpia el usuario.
+- **Hidratación:** al abrir la app, si hay token se consulta `GET /usuarios/me`; un 401 cierra la sesión local.
+- **Mitigación de XSS:** React escapa el contenido, no se usa `dangerouslySetInnerHTML` con datos del backend, Nginx aplica CSP y el token no viaja en la URL.
+- **Fuera de esta iteración:** cookie `httpOnly`, refresh token y revocación de sesión.
+
+## 5. OpenAPI
 
 Si es viable, `docs/openapi.yaml` se genera en F6 y se valida en `gate-2.sh` con `schemathesis`, `dredd` o equivalente. Si no es viable, esta sección deja el TODO explícito y la matriz sigue siendo la referencia de cobertura.

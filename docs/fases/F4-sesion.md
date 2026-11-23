@@ -4,7 +4,7 @@
 |---|---|
 | **Fase** | F4 |
 | **Gate** | G4 |
-| **Estado** | Planificada |
+| **Estado** | Cerrada (commit pendiente) |
 | **Documento maestro** | `../../planificacion_desarrollo.md` |
 
 ## 1. Contexto
@@ -81,19 +81,20 @@ Resultado esperado:
 - `scripts/gate-4.sh` verifica G3 y ejecuta la suite de la fase.
 - Registro, login, logout y sesión persistente funcionan contra la API.
 - El contacto queda registrado en la base.
-- El interceptor 401 limpia la sesión.
+- El interceptor 401 limpia la sesión y emite `kateye:sesion-expirada`.
+- `scripts/check-deuda.sh 4` no reporta deuda vencida para F4.
 - `docs/memoria/mm_devFase4.md` existe y describe los archivos y acciones.
 
 ## 6. Registro de ejecución
 
-- **Fecha:**
-- **Autor:**
-- **Comandos ejecutados:**
-- **Resultado:**
-- **Desviaciones:**
+- **Fecha:** 2026-11-22
+- **Autor:** Benjamín López
+- **Comandos ejecutados:** `mvn test`; `npm run test:coverage`; `scripts/check-deuda.sh 4`; `scripts/gate-4.sh`; `scripts/sync-progreso.sh`.
+- **Resultado:** G4 en verde (`exit 0`). Backend en verde, 99 tests de frontend verdes, cobertura 73.62/60.74/66.81/72.11 y build correcto. Evidencia en `.gates/gate-4.ok`.
+- **Desviaciones:** correo opcional guardado como `""` (DT-15, F6); checkout/pagos simulados (DT-14, F5); N+1 de imágenes/ofertas (DT-13, F6); OpenAPI y Prettier global pendientes (F6).
 - **Memoria:** `docs/memoria/mm_devFase4.md`
 - **Commit sugerido:** `feat: integra sesión JWT, registro y contacto`
-- **Commit realizado:**
+- **Commit realizado:** pendiente (lo realiza el usuario)
 
 ## 7. Pendientes para la siguiente fase
 

@@ -25,6 +25,8 @@ log "Prettier (archivos nuevos y de configuración)"
     src/test/DetalleProducto.test.jsx src/test/client.test.js
     src/test/urlAsset.test.js src/test/Header.test.jsx src/test/Inicio.test.jsx
     src/test/Blogs.test.jsx src/test/Blog.test.jsx src/test/Registro.test.jsx
+    src/test/SesionProvider.test.jsx src/test/IniciarSesion.test.jsx
+    src/test/Contacto.test.jsx src/test/validaciones.test.js
     src/utils/producto.js
   )
   if [ -d src/api ]; then
