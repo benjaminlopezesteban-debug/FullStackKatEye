@@ -29,6 +29,8 @@ services:
       KATEYE_PAGO_SIMULADO_RESULTADO: ${KATEYE_PAGO_SIMULADO_RESULTADO:-APROBADA}
       KATEYE_PEDIDO_EXPIRACION_MINUTOS: ${KATEYE_PEDIDO_EXPIRACION_MINUTOS:-30}
       KATEYE_PEDIDO_ZONA_HORARIA: ${KATEYE_PEDIDO_ZONA_HORARIA:-America/Santiago}
+    volumes:
+      - ./KatEye-Back/media:/app/media
     depends_on:
       db:
         condition: service_healthy

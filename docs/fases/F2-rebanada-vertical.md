@@ -4,7 +4,7 @@
 |---|---|
 | **Fase** | F2 |
 | **Gate** | G2 |
-| **Estado** | Planificada |
+| **Estado** | Cerrada (commit pendiente) |
 | **Documento maestro** | `../../planificacion_desarrollo.md` |
 
 ## 1. Contexto
@@ -88,8 +88,14 @@ Esta fase también resuelve el problema de imágenes: el plan anterior mapeaba 4
 1. Crear `scripts/gate-2.sh`:
    - `set -euo pipefail` y `cd "$(git rev-parse --show-toplevel)"`;
    - verificar el prerrequisito de G1; si falta, imprimir “Ejecuta primero scripts/gate-1.sh” y salir con código 2;
-   - ejecutar `CorsIT`, el preflight, los tests de catálogo y el contract test;
+   - ejecutar `scripts/check-deuda.sh 2` y `scripts/check-imagenes.sh`;
+   - ejecutar `CorsIT`, el contrato, los tests de catálogo y el contract test;
    - validar `docs/openapi.yaml` si existe; si no, reportar el TODO de la matriz como warning.
+
+### Deuda técnica
+
+1. Registrar en `docs/deuda-tecnica.md` las desviaciones de F2 (carrito con snapshot, OpenAPI pendiente, imágenes faltantes, Header legado, test de Inicio).
+2. Ejecutar `scripts/check-deuda.sh 2`; no debe haber deuda vencida para F2.
 
 ## 4. Consecuencias
 
@@ -104,9 +110,11 @@ Esta fase también resuelve el problema de imágenes: el plan anterior mapeaba 4
 ```bash
 cd TiendaKatEye
 scripts/gate-2.sh
+scripts/check-deuda.sh 2
+scripts/check-imagenes.sh
 
 cd KatEye-Back
-mvn test -Dtest=CorsIT
+mvn test
 
 curl -i -X OPTIONS http://localhost:8080/api/v1/productos \
   -H "Origin: http://localhost:5173" \
@@ -131,20 +139,22 @@ Resultado esperado:
 - Imagen `kat-004.jpg` responde 200.
 - Test MSW de `client.js` verde.
 - Contract test de `GET /productos` verde; si falla, G2 falla.
+- `scripts/check-imagenes.sh` no reporta productos sin imagen ni excepción.
+- `scripts/check-deuda.sh 2` no reporta deuda vencida para F2.
 - Si existe `docs/openapi.yaml`, la validación del spec pasa; si no, la matriz deja el TODO.
 - Catálogo visible en el navegador con imágenes del backend.
 - `docs/memoria/mm_devFase2.md` existe y describe los archivos y acciones.
 
 ## 6. Registro de ejecución
 
-- **Fecha:**
-- **Autor:**
-- **Comandos ejecutados:**
-- **Resultado:**
-- **Desviaciones:**
+- **Fecha:** 2026-11-22
+- **Autor:** Benjamín López
+- **Comandos ejecutados:** `npm install axios`; `mvn test -Dtest=CorsIT,ProductoContractTest`; `npm run test:coverage`; `scripts/check-imagenes.sh`; `scripts/check-deuda.sh 2`; `scripts/gate-2.sh`.
+- **Resultado:** G2 en verde (`exit 0`). `CorsIT` y `ProductoContractTest` verdes, 64 tests de frontend verdes, cobertura 33.14/37.70/28.87/31.87 y build correcto. Evidencia en `.gates/gate-2.ok`.
+- **Desviaciones:** preflight real omitido porque el backend no estaba levantado; espejos no sincronizados por cambios de F1 sin commitear (DT-12); OpenAPI pendiente (DT-06); carrito con snapshot (DT-08).
 - **Memoria:** `docs/memoria/mm_devFase2.md`
 - **Commit sugerido:** `feat: conecta catálogo con axios y CORS real`
-- **Commit realizado:**
+- **Commit realizado:** pendiente (lo realiza el usuario)
 
 ## 7. Pendientes para la siguiente fase
 
@@ -153,4 +163,5 @@ Resultado esperado:
 - Revisar la tabla de reconciliación y el script de imágenes.
 - Confirmar que el contract test de `GET /productos` no usa MSW y que su fallo rompe G2.
 - Confirmar si `docs/openapi.yaml` es viable; si no, dejar el TODO en `docs/api-integracion.md`.
-- Confirmar que los espejos `ProyectoWebKatEyes` y `backendProyectoKatEye` recibieron los cambios de la fase.
+- Commitear los espejos con los cambios de F1 y ejecutar `make sync` para cerrar DT-12.
+- Resolver en F3 las deudas DT-03, DT-09 y DT-11 antes de ejecutar `scripts/check-deuda.sh 3`.

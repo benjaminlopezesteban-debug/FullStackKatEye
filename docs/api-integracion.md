@@ -35,10 +35,10 @@
 
 | Endpoint | Método | Request | Response OK | Errores | Test que lo cubre | Gate que lo exige |
 |---|---|---|---|---|---|---|
-| `/productos` | GET | `categoriaId`, `precioMin`, `precioMax` | `List<ProductoResponse>` con `imagenUrl` | `400` | `contract.productos.test.js` (cliente HTTP real) | G2 / G3 |
-| `/productos/{id}` | GET | `id` | `ProductoResponse` | `404` | `contract.productos.test.js` | G2 |
-| `/productos/{id}/relacionados` | GET | `id` | `List<ProductoResponse>` | `404` | `catalogo.relacionados.test.js` | G3 |
-| `/categorias` | GET | — | `List<CategoriaResponse>` | `500` | `catalogo.filtros.test.js` | G3 |
+| `/productos` | GET | `categoriaId`, `precioMin`, `precioMax` | `List<ProductoResponse>` con `imagenUrl` | `400` | `Productos.test.jsx`, `productos.contract.test.js` y `ProductoContractTest` | G2 / G3 |
+| `/productos/{id}` | GET | `id` | `ProductoResponse` | `404` | `DetalleProducto.test.jsx` y `ProductoContractTest` | G2 |
+| `/productos/{id}/relacionados` | GET | `id` | `List<ProductoResponse>` | `404` | `DetalleProducto.test.jsx` | G2 |
+| `/categorias` | GET | — | `List<CategoriaResponse>` | `500` | `Productos.test.jsx` | G2 / G3 |
 | `/blogs` | GET | — | `List<EntradaBlogResponse>` | `500` | `blogs.test.js` | G3 |
 | `/blogs/{slug}` | GET | `slug` | `EntradaBlogResponse` | `404` | `blogs.test.js` | G3 |
 | `/regiones` | GET | — | `List<RegionResponse>` | `500` | `regiones.test.js` | G3 |
@@ -67,6 +67,7 @@ Reglas:
 - **Cabeceras:** `*`.
 - **Credenciales:** `allowCredentials = true`.
 - **Preflight:** `OPTIONS` sobre `/api/v1/**` responde `200` con `Access-Control-Allow-Origin` para el origen permitido; un origen desconocido recibe `403`.
+- **Test que lo cubre:** `CorsIT` (backend), exigido por G2.
 - **Producción:** same-origin mediante Nginx; se conservan `Host` y `X-Forwarded-*`.
 
 Verificación manual:

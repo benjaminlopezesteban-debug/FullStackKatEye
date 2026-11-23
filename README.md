@@ -93,6 +93,7 @@ make gate-all    # ejecuta gate-0 … gate-6 en orden
 make gate-lint   # ESLint + Prettier + linter del backend
 make sync        # scripts/sync-progreso.sh
 make test        # suites de frontend y backend
+make deuda FASE=2  # revisa la deuda técnica vencida para la fase 2
 ```
 
 Convención de gates:
@@ -208,6 +209,16 @@ scripts/sync-progreso.sh
 ## Memoria de desarrollo
 
 Al finalizar cada fase se crea `docs/memoria/mm_devFaseX.md`. Allí se registran, en orden, los archivos creados o modificados y las acciones relevantes, con una descripción breve de qué hace cada uno. La plantilla está en `docs/memoria/PLANTILLA.md`.
+
+## Deuda técnica
+
+Las desviaciones no se dejan implícitas: se registran en [`docs/deuda-tecnica.md`](docs/deuda-tecnica.md) con su impacto y **fase objetivo**. Cada gate ejecuta `scripts/check-deuda.sh <fase>`; si una deuda sigue abierta y su fase objetivo ya venció, el gate falla. Para revisarla manualmente:
+
+```bash
+make deuda FASE=2
+```
+
+Al cerrar una deuda se cambia su estado a **Resuelta** y se deja la evidencia en la memoria de la fase.
 
 ## Secretos
 

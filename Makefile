@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: gate-0 gate-1 gate-2 gate-3 gate-4 gate-5 gate-6 gate-lint gate-all sync up down test
+.PHONY: gate-0 gate-1 gate-2 gate-3 gate-4 gate-5 gate-6 gate-lint gate-all sync up down test deuda
 
 gate-0:
 	@scripts/gate-0.sh
@@ -44,3 +44,6 @@ down:
 test:
 	@(cd KatEye-Front && npm run test:run)
 	@mvn test -f KatEye-Back/katEye/pom.xml
+
+deuda:
+	@scripts/check-deuda.sh "$${FASE:-$${KATEYE_FASE:-}}"

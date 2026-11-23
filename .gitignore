@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.example
+!.env.development
+!.env.production
+!.env.test
 *.local
 
 # Builds y dependencias

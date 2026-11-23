@@ -19,7 +19,12 @@ log "ESLint (frontend)"
 log "Prettier (archivos nuevos y de configuración)"
 (
   cd KatEye-Front
-  targets=(package.json vite.config.js eslint.config.js src/test/setup.js src/test/mocks)
+  targets=(
+    package.json vite.config.js eslint.config.js src/test/setup.js
+    src/test/mocks src/test/contract src/test/Productos.test.jsx
+    src/test/DetalleProducto.test.jsx src/test/client.test.js
+    src/test/urlAsset.test.js src/utils/producto.js
+  )
   if [ -d src/api ]; then
     targets+=(src/api)
   fi

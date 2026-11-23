@@ -4,12 +4,13 @@
 
 | Métrica | Cobertura | Cubierto | Total |
 |---|---|---|---|
-| Líneas | 21.80% | 99 | 454 |
-| Ramas | 28.01% | 65 | 232 |
-| Funciones | 22.96% | 48 | 209 |
-| Sentencias | 21.28% | 109 | 512 |
+| Líneas | 33.14% | 175 | 528 |
+| Ramas | 37.70% | 115 | 305 |
+| Funciones | 28.87% | 69 | 239 |
+| Sentencias | 31.87% | 189 | 593 |
 
 ## Umbrales
 
-Los umbrales de F1 son el baseline real: líneas 21, ramas 28, funciones 22 y sentencias 21.
-El objetivo del plan es subirlos por fase hasta líneas ≥ 80 y ramas ≥ 70. Si bajan, `gate-1.sh` falla.
+Los umbrales se ajustan al baseline de cada fase y deben subir hasta líneas ≥ 80 y ramas ≥ 70.
+Valores actuales en `vite.config.js`: líneas 33, ramas 37, funciones 28 y sentencias 31.
+Si la cobertura baja de esos valores, `gate-1.sh` y `gate-2.sh` fallan.

@@ -8,7 +8,7 @@ Cada fase produce además `docs/memoria/mm_devFaseX.md`, la memoria del desarrol
 |---|---|---|---|---|
 | F0 | [F0-estructura.md](F0-estructura.md) | `../memoria/mm_devFase0.md` | G0 | Cerrada (commit pendiente) |
 | F1 | [F1-pruebas.md](F1-pruebas.md) | `../memoria/mm_devFase1.md` | G1 | Cerrada (commit pendiente) |
-| F2 | [F2-rebanada-vertical.md](F2-rebanada-vertical.md) | `../memoria/mm_devFase2.md` | G2 | Planificada |
+| F2 | [F2-rebanada-vertical.md](F2-rebanada-vertical.md) | `../memoria/mm_devFase2.md` | G2 | Cerrada (commit pendiente) |
 | F3 | [F3-catalogo.md](F3-catalogo.md) | `../memoria/mm_devFase3.md` | G3 | Planificada |
 | F4 | [F4-sesion.md](F4-sesion.md) | `../memoria/mm_devFase4.md` | G4 | Planificada |
 | F5 | [F5-checkout.md](F5-checkout.md) | `../memoria/mm_devFase5.md` | G5 | Planificada |
@@ -30,6 +30,7 @@ Cada fase produce además `docs/memoria/mm_devFaseX.md`, la memoria del desarrol
 5. **Cada fase deja su memoria** en `docs/memoria/mm_devFaseX.md`, con archivos y acciones en orden.
 6. **La arquitectura se actualiza** en `docs/ARQUITECTURA.md` si cambia la estructura.
 7. **Los espejos de progreso se sincronizan** con `scripts/sync-progreso.sh` al cerrar la fase; el usuario commitea y pushea en cada repositorio independiente.
+8. **La deuda técnica se revisa al abrir y cerrar cada fase**: `scripts/check-deuda.sh <fase>` falla si una deuda abierta ya venció. Las desviaciones se registran en [`../deuda-tecnica.md`](../deuda-tecnica.md) con impacto y fase objetivo.
 
 ## Plantilla
 

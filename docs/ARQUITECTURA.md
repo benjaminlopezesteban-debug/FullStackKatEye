@@ -271,7 +271,7 @@ KatEye-Back/                         # código importado de backendProyectoKatEy
 |---|---|---|
 | `${JWT_SECRET}` y `${SPRING_DATASOURCE_PASSWORD}` sin default | F0 | H4: secretos fuera del código |
 | `ProductoResponse.imagenUrl` | F2 | H6: una sola fuente de verdad para imágenes |
-| `spring.web.resources.static-locations=file:/app/media/,classpath:/static/` | F2 | H6: imágenes fuera del JAR |
+| `spring.web.resources.static-locations=file:/app/media/,file:../media/,classpath:/static/` | F2 | H6: imágenes fuera del JAR |
 | `server.forward-headers-strategy=framework` | F2 | H3: CORS y cabeceras de proxy |
 | `CorsIT` | F2 | H3: evidencia automatizada de CORS |
 | `Idempotency-Key` con `required = true` | F5 | H1: contrato coherente con el comportamiento |

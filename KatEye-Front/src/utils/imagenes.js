@@ -1,5 +1,6 @@
-/* src/utils/imagenes.js — resuelve nombres de archivo a URLs de src/assets.
+import { urlAsset } from "../api/urlAsset";
 
+/* src/utils/imagenes.js — resuelve nombres de archivo a URLs de src/assets.
    Problema: con las imágenes en src/assets, Vite les cambia el nombre al
    compilar (Base líquida mate.jpg → Base_líquida_mate-a1b2c3.jpg), así que
    no se puede escribir src="/assets/Base líquida mate.jpg" a mano.
@@ -35,4 +36,20 @@ const IMAGENES = Object.fromEntries(
 /* "Base líquida mate.jpg" → URL final. Si el archivo no existe, devuelve el placeholder. */
 export function resolverImagen(nombreArchivo) {
     return IMAGENES[String(nombreArchivo).normalize("NFC")] ?? IMG_PLACEHOLDER;
+}
+
+/* Producto del catálogo: usa imagenUrl de la API o el asset local legado. */
+export function resolverImagenProducto(producto) {
+    if (producto?.imagenUrl) {
+        return urlAsset(producto.imagenUrl);
+    }
+    return resolverImagen(producto?.imagenes?.[0]);
+}
+
+/* Línea del carrito: usa imagenUrl de la API o el asset local legado. */
+export function resolverImagenLinea(linea) {
+    if (linea?.imagenUrl) {
+        return urlAsset(linea.imagenUrl);
+    }
+    return resolverImagen(linea?.imagen);
 }

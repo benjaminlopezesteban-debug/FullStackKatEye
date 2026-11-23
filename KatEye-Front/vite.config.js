@@ -13,6 +13,10 @@ export default defineConfig({
     globals: true,
     setupFiles: ["src/test/setup.js"],
     css: false,
+    env: {
+      VITE_API_URL: "/api/v1",
+      VITE_ASSETS_URL: "http://localhost:8080",
+    },
     exclude: [...configDefaults.exclude, "src/App.test.js"],
     coverage: {
       provider: "v8",
@@ -29,10 +33,10 @@ export default defineConfig({
         "src/setupTests.js",
       ],
       thresholds: {
-        lines: 21,
-        branches: 28,
-        functions: 22,
-        statements: 21,
+        lines: 33,
+        branches: 37,
+        functions: 28,
+        statements: 31,
       },
     },
   },
