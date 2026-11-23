@@ -11,14 +11,15 @@
 
 Con el flujo de compra cerrado, falta el entorno reproducible y la documentación de entrega. El plan anterior no tenía healthcheck del backend, Nginx resolvía `backend` al arrancar y los puertos estaban fijos; además, la documentación de la pauta (ERS, manual, APIs, cobertura) no aparecía en ninguna fase.
 
-Esta fase deja `TiendaKatEye` listo como entorno único de evaluación y actualiza la documentación de entrega.
+Esta fase deja `TiendaKatEye`/`FullStackKatEye` listo como repositorio unificado y entorno único de evaluación, con los espejos de progreso actualizados, y cierra la documentación de entrega.
 
 ## 2. Decisiones
 
-- **D4:** `TiendaKatEye` es el entorno único de evaluación.
+- **D4:** `TiendaKatEye` es el repositorio unificado y el entorno único de evaluación.
 - **D14:** producción same-origin vía Nginx, conservando `Host` y `X-Forwarded-*`.
 - **D19:** Docker mínimo viable ahora; resolver DNS, gzip y caché quedan como hardening posterior.
 - **D18:** el usuario commitea al cerrar la fase.
+- **D20:** al finalizar la fase se crea `docs/memoria/mm_devFase6.md`.
 
 ## 3. Cambios a aplicar
 
@@ -59,10 +60,20 @@ Esta fase deja `TiendaKatEye` listo como entorno único de evaluación y actuali
 2. Crear/actualizar:
    - `docs/ERS-v2.md`
    - `docs/manual-usuario.md`
-   - `docs/api-integracion.md`
    - `docs/cobertura.md`
-3. Agregar Swagger/OpenAPI si la pauta vigente lo exige.
+   - `docs/api-integracion.md` con tres secciones: (1) contrato —endpoints, DTOs, códigos de error y orígenes CORS permitidos—; (2) **Matriz de contract tests** con columnas `Endpoint | Método | Request | Response OK | Errores | Test que lo cubre | Gate que lo exige`, una fila por endpoint (catálogo, sesión, contacto, carrito, checkout, pago y pago rechazado); (3) **CORS** con orígenes permitidos, preflight y credenciales. Los endpoints sin test quedan como warning explícito hasta cubrirse.
+3. Generar `docs/openapi.yaml` si es viable y validarlo en `gate-2.sh` con `schemathesis`, `dredd` o equivalente. Si no es viable, dejar el TODO explícito en la matriz de `docs/api-integracion.md`.
 4. Actualizar `docs/ARQUITECTURA.md` con el árbol final.
+
+### Gates y ergonomía
+
+1. Endurecer `scripts/gate-6.sh`:
+   - `set -euo pipefail` y `cd "$(git rev-parse --show-toplevel)"`;
+   - verificar el prerrequisito de G5; si falta, imprimir “Ejecuta primero scripts/gate-5.sh” y salir con código 2;
+   - `trap 'docker compose down --remove-orphans' EXIT`;
+   - ser idempotente: dos ejecuciones seguidas dejan el entorno limpio y devuelven exit 0.
+2. Verificar que `Makefile` expone `gate-all` y que `scripts/install-hooks.sh` instala el `pre-push` con `gate-lint` y el gate de la fase actual.
+3. Actualizar el `README.md` con la sección “Desarrollo local” (`make up`, `make gate-N`, `make gate-all`) y “Fuente de verdad y espejos”.
 
 ### Release
 
@@ -70,7 +81,12 @@ Esta fase deja `TiendaKatEye` listo como entorno único de evaluación y actuali
 2. Ejecutar el smoke completo.
 3. Ejecutar `gitleaks`.
 4. Ejecutar la cobertura final.
-5. Revisar que cada fase tenga su documento cerrado.
+5. Verificar que `FullStackKatEye` contiene el código de `KatEye-Front/` y `KatEye-Back/`, no solo documentación.
+6. Ejecutar `scripts/sync-progreso.sh` y dejar ambos espejos listos para el commit final del usuario.
+7. Revisar que cada fase tenga su documento y su memoria cerrados.
+8. Ejecutar `scripts/gate-6.sh` dos veces seguidas y confirmar exit 0 sin contenedores huérfanos.
+9. Ejecutar `make gate-all` y guardar la evidencia de exit 0.
+10. Crear `docs/memoria/mm_devFase6.md` con los archivos creados y las acciones relevantes, en orden, y un resumen final con: qué se cambió, qué gates se vieron afectados y la evidencia de exit 0 de `make gate-all`.
 
 ## 4. Consecuencias
 
@@ -85,6 +101,12 @@ Esta fase deja `TiendaKatEye` listo como entorno único de evaluación y actuali
 ```bash
 cd TiendaKatEye
 
+scripts/gate-6.sh
+scripts/gate-6.sh
+make gate-all
+test -f scripts/install-hooks.sh
+test -f docs/api-integracion.md
+
 docker compose config
 docker compose up --build -d
 docker compose ps
@@ -94,6 +116,10 @@ curl -i http://localhost/api/v1/productos
 curl -I http://localhost/img/productos/kat-004.jpg
 
 gitleaks detect --source .
+
+git log --oneline -- KatEye-Front | head -5
+git log --oneline -- KatEye-Back  | head -5
+test -f docs/memoria/mm_devFase6.md && echo "memoria F6 OK"
 
 cd KatEye-Front
 npm run test:coverage
@@ -110,6 +136,18 @@ Smoke completo:
 6. Contacto.
 7. Preflight CORS.
 
+Resultado esperado:
+
+- Los tres contenedores levantan y el backend responde sano.
+- `scripts/gate-6.sh` se ejecuta dos veces seguidas con exit 0 y sin contenedores huérfanos.
+- `make gate-all` devuelve exit 0 en estado limpio.
+- `docs/api-integracion.md` tiene la matriz completa; los endpoints sin test quedan como warning explícito.
+- El smoke completo pasa.
+- `gitleaks` limpio.
+- El historial importado es visible por subdirectorio.
+- `docs/memoria/mm_devFase6.md` existe y describe los archivos y acciones.
+- Los espejos `ProyectoWebKatEyes` y `backendProyectoKatEye` quedaron listos para el commit final.
+
 ## 6. Registro de ejecución
 
 - **Fecha:**
@@ -117,6 +155,7 @@ Smoke completo:
 - **Comandos ejecutados:**
 - **Resultado:**
 - **Desviaciones:**
+- **Memoria:** `docs/memoria/mm_devFase6.md`
 - **Commit sugerido:** `chore: cierra Docker, documentación y release`
 - **Commit realizado:**
 
@@ -128,3 +167,4 @@ Smoke completo:
 - Recuperación de contraseña en la interfaz.
 - Rutas `/ofertas`, `/categorias` y `/mis-pedidos`, si la pauta las exige.
 - Refresh token y revocación de sesión.
+- Automatizar la sincronización de espejos dentro de un pipeline de CI.

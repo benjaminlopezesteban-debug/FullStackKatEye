@@ -1,0 +1,4 @@
+services:
+  backend:
+    environment:
+      KATEYE_PAGO_SIMULADO_RESULTADO: RECHAZADA

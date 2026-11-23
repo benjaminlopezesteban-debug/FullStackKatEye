@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Proyecto** | KatEye / TiendaKatEye |
-| **Versión** | 1.0 |
+| **Versión** | 1.1 |
 | **Fecha** | 2026-11-21 |
-| **Ámbito** | Repositorio de orquestación, frontend React, backend Spring Boot y base MySQL |
+| **Ámbito** | Repositorio unificado, frontend React, backend Spring Boot y base MySQL |
 | **Documento maestro** | `../planificacion_desarrollo.md` |
 
 ---
@@ -20,8 +20,8 @@ Principios:
 2. **El backend es la fuente de verdad:** precios, stock, totales, estados y permisos se calculan en el servidor.
 3. **Un solo modelo de datos en el frontend:** las vistas consumen los DTO del backend; no hay adaptadores que perpetúen el modelo legado.
 4. **Un solo flujo de compra:** no conviven checkout simulado y checkout real.
-5. **Repositorios independientes:** frontend y backend conservan su historial; `TiendaKatEye` los orquesta como entorno único de evaluación.
-6. **Cada fase deja evidencia:** gate ejecutable y documento en `docs/fases/`.
+5. **Un solo repositorio de entrega:** `TiendaKatEye`/`FullStackKatEye` contiene el código y el historial importado de frontend y backend; los repositorios independientes son espejos de progreso.
+6. **Cada fase deja evidencia y memoria:** gate ejecutable, documento en `docs/fases/` y `docs/memoria/mm_devFaseX.md`.
 
 ---
 
@@ -29,21 +29,21 @@ Principios:
 
 ```text
 GitHub
-├── ProyectoWebKatEyes          ← frontend React + Vite + Nginx
-├── backendProyectoKatEye       ← backend Spring Boot + Dockerfile
-└── TiendaKatEye                ← repositorio de orquestación (entorno único de evaluación)
-    ├── KatEye-Front  (submódulo → ProyectoWebKatEyes)
-    ├── KatEye-Back   (submódulo → backendProyectoKatEye)
-    └── KatEye-DB     (carpeta del repo de orquestación)
+├── FullStackKatEye             ← entrega final unificada (directorio local TiendaKatEye)
+│   ├── KatEye-Front/           ← código + historial importado de ProyectoWebKatEyes
+│   ├── KatEye-Back/            ← código + historial importado de backendProyectoKatEye
+│   └── KatEye-DB/              ← esquema, README e init opcional
+├── ProyectoWebKatEyes          ← espejo de progreso del frontend
+└── backendProyectoKatEye       ← espejo de progreso del backend
 ```
 
 `kateyefullStack` (repositorio raíz del workspace) **no** forma parte de la entrega y no se modifica.
 
-Los commits los realiza el usuario al cerrar cada fase; el plan solo sugiere el mensaje.
+Los commits los realiza el usuario al cerrar cada fase; el plan solo sugiere el mensaje. `TiendaKatEye` es la fuente de verdad; los espejos se actualizan con `scripts/sync-progreso.sh`.
 
 ---
 
-## 3. Árbol del repositorio de orquestación
+## 3. Árbol del repositorio unificado
 
 ```text
 TiendaKatEye/
@@ -52,14 +52,18 @@ TiendaKatEye/
 ├── docker-compose.yml               # db + backend + frontend; red kateye-net
 ├── docker-compose.rechazo.yml       # override: KATEYE_PAGO_SIMULADO_RESULTADO=RECHAZADA
 ├── README.md                        # información para el usuario y despliegue
+├── Makefile                         # gate-0…gate-6, gate-lint, gate-all, sync, up, down, test
 ├── scripts/
-│   ├── gate-0.sh                    # compose config + gitleaks + builds + submodules
-│   ├── gate-1.sh                    # vitest + coverage + build
-│   ├── gate-2.sh                    # CorsIT + preflight + MSW + catálogo
-│   ├── gate-3.sh                    # tests catálogo + grep de mocks
+│   ├── gate-0.sh                    # compose config + gitleaks + builds + historial importado
+│   ├── gate-1.sh                    # lint + vitest + coverage + build
+│   ├── gate-2.sh                    # CorsIT + preflight + contract test + catálogo
+│   ├── gate-3.sh                    # tests catálogo + grep anti-mocks + contract test
 │   ├── gate-4.sh                    # tests sesión/validación/contacto
-│   ├── gate-5.sh                    # tests carrito/checkout/pago
+│   ├── gate-5.sh                    # tests carrito/checkout/pago (override de rechazo)
 │   ├── gate-6.sh                    # compose up + smoke + gitleaks + docs
+│   ├── gate-lint.sh                 # ESLint + Prettier + linter del backend (transversal)
+│   ├── install-hooks.sh             # instala .git/hooks/pre-push
+│   ├── sync-progreso.sh             # espeja KatEye-Front/Back en los repos independientes
 │   └── smoke-cors.sh                # preflight CORS por curl
 ├── docs/
 │   ├── ARQUITECTURA.md              # este documento
@@ -72,12 +76,15 @@ TiendaKatEye/
 │   │   ├── F4-sesion.md
 │   │   ├── F5-checkout.md
 │   │   └── F6-release.md
+│   ├── memoria/
+│   │   ├── PLANTILLA.md             # formato de mm_devFaseX.md
+│   │   └── mm_devFase0.md … mm_devFase6.md
 │   ├── ERS-v2.md
 │   ├── cobertura.md
 │   ├── api-integracion.md
 │   └── manual-usuario.md
-├── KatEye-Front/   (submódulo)      # repo ProyectoWebKatEyes
-├── KatEye-Back/    (submódulo)      # repo backendProyectoKatEye
+├── KatEye-Front/                    # código + historial de ProyectoWebKatEyes
+├── KatEye-Back/                     # código + historial de backendProyectoKatEye
 └── KatEye-DB/
     ├── README.md
     └── init/                        # opcional; Flyway sigue siendo el dueño del esquema
@@ -90,6 +97,16 @@ TiendaKatEye/
 | `kateye-db` | `mysql:8.4` | solo red interna | Datos, volumen y healthcheck |
 | `kateye-backend` | `./KatEye-Back/katEye` | `${BACKEND_PORT:-8080}` | API Spring Boot, Flyway, JWT |
 | `kateye-frontend` | `./KatEye-Front` | `80:80` | SPA React servida por Nginx y proxy `/api` e `/img` |
+
+### Sincronización de espejos
+
+`TiendaKatEye` es la fuente de verdad. Al cerrar cada fase, `scripts/sync-progreso.sh`:
+
+1. Verifica que los espejos no tengan cambios sin commitear.
+2. Copia `KatEye-Front/` → `ProyectoWebKatEyes/` y `KatEye-Back/` → `backendProyectoKatEye/`, excluyendo `.git`, `node_modules`, `target`, `dist` y `.env`.
+3. Deja los cambios listos para que el usuario los revise, commitee y pushee en cada espejo.
+
+El script no commitea ni pushea automáticamente. Si un espejo tiene cambios propios, el script aborta; se reconcilia el espejo antes de reintentar.
 
 ---
 
@@ -201,9 +218,9 @@ api/client.js  ──axios──▶  Spring Boot /api/v1
 ## 5. Árbol del backend (actual + cambios de la iteración)
 
 ```text
-KatEye-Back/                         # repo backendProyectoKatEye
+KatEye-Back/                         # código importado de backendProyectoKatEye
 ├── .env.example                     # sin secretos reales
-├── docker-compose.yml               # legado: no se usa en la orquestación
+├── docker-compose.yml               # legado: no se usa en el monorepo
 ├── docs/proyecto/
 │   ├── ARQUITECTURA_BACKEND.md
 │   ├── plan_desarrollo.md
@@ -483,7 +500,7 @@ Cada gate G1–G5 incluye la suite de su fase. No se concentran todos los tests 
 
 | Fase | Documento | Qué registra |
 |---|---|---|
-| F0 | `docs/fases/F0-estructura.md` | Repositorios, secretos, submódulos y compose mínimo |
+| F0 | `docs/fases/F0-estructura.md` | Historial importado, secretos y compose mínimo |
 | F1 | `docs/fases/F1-pruebas.md` | Vitest, MSW, ESLint y baseline |
 | F2 | `docs/fases/F2-rebanada-vertical.md` | Axios, CORS, catálogo e imágenes |
 | F3 | `docs/fases/F3-catalogo.md` | Catálogo, blogs, ubicación y borrado de mocks |
@@ -492,6 +509,8 @@ Cada gate G1–G5 incluye la suite de su fase. No se concentran todos los tests 
 | F6 | `docs/fases/F6-release.md` | Docker, documentación y release |
 
 Cada documento se completa con el **registro de ejecución** al cerrar el gate. El índice y la plantilla están en `docs/fases/INDICE.md`.
+
+Cada fase produce además `docs/memoria/mm_devFaseX.md`, la memoria del desarrollo: archivos creados o modificados y acciones relevantes, en orden, con una descripción breve. La plantilla está en `docs/memoria/PLANTILLA.md`.
 
 ---
 
@@ -502,7 +521,7 @@ Cada documento se completa con el **registro de ejecución** al cerrar el gate. 
 | D1 | Alternativa A con ejecución híbrida | Plan §2 |
 | D2 | Vitest + jsdom + Testing Library + MSW | Plan §2, §8 |
 | D3 | Imágenes de producto en backend, volumen externo | Plan §7 |
-| D4 | `TiendaKatEye` como entorno único de evaluación | Plan §2, §4 |
+| D4 | `TiendaKatEye` como repositorio unificado y entorno único de evaluación | Plan §2, §4 |
 | D5 | `react-router-dom` 7.18.5 | Plan §2 |
 | D6 | Carrito hasta confirmación del backend | Plan §2 |
 | D7 | Correo de contacto opcional | Plan §2 |
@@ -510,7 +529,7 @@ Cada documento se completa con el **registro de ejecución** al cerrar el gate. 
 | D9 | JWT en `localStorage` con mitigaciones | Plan §2, §10 |
 | D10 | Rechazo con `KATEYE_PAGO_SIMULADO_RESULTADO` | Plan §2, §10 |
 | D11 | Checkout real en esta iteración | Plan §2, §10 |
-| D12 | Repos independientes + submódulos | Plan §2, §4 |
+| D12 | Monorepo + espejos de progreso | Plan §2, §4 |
 | D13 | Solo imágenes de producto al backend | Plan §2, §7 |
 | D14 | CORS real en desarrollo | Plan §2, §7 |
 | D15 | Secretos fuera del código | Plan §2, §5 |
@@ -518,6 +537,7 @@ Cada documento se completa con el **registro de ejecución** al cerrar el gate. 
 | D17 | `Idempotency-Key` obligatoria | Plan §2, §8 |
 | D18 | Commits del usuario por fase | Plan §2, §11 |
 | D19 | Docker mínimo ahora; hardening posterior | Plan §2, §10 |
+| D20 | Memoria `mm_devFaseX.md` al cerrar cada fase | Plan §2, §10 |
 
 ---
 
@@ -527,5 +547,7 @@ Al cerrar cada fase:
 
 1. Actualizar el árbol de este documento si cambió la estructura.
 2. Actualizar el documento de la fase con el registro de ejecución.
-3. Verificar que el gate correspondiente quedó documentado.
-4. No avanzar a la siguiente fase si el gate falla.
+3. Crear `docs/memoria/mm_devFaseX.md` con archivos y acciones en orden.
+4. Verificar que el gate correspondiente quedó documentado.
+5. Ejecutar `scripts/sync-progreso.sh` y dejar los espejos listos para el commit del usuario.
+6. No avanzar a la siguiente fase si el gate falla.

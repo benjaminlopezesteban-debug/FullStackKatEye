@@ -1,0 +1,21 @@
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+*.local
+
+# Builds y dependencias
+target/
+node_modules/
+dist/
+build/
+coverage/
+
+# Artefactos y editores
+*.zip
+.idea/
+.vscode/
+.DS_Store
+
+# Estado local de los gates
+.gates/

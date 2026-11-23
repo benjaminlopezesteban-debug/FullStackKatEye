@@ -18,7 +18,9 @@ Esta fase migra las vistas al DTO real, resuelve los filtros en el servidor y el
 - **H11:** un solo modelo: el contrato del backend; sin adaptadores que perpetúen `imagenes[]`, `precioAnterior` o `categoria`.
 - **D13:** las imágenes de blog permanecen en el frontend; `EntradaBlogResponse.imagen` es el nombre de archivo y se resuelve con `resolverImagen`.
 - **D2/D16:** tests de catálogo, filtros y selects con Vitest + MSW.
-- **D18:** el usuario commitea al cerrar la fase.
+- **D18:** el usuario commitea al cerrar la fase; B3 puede ir en un commit separado.
+- **D20:** al finalizar la fase se crea `docs/memoria/mm_devFase3.md`.
+- **D22:** el chequeo anti-mocks es de dos capas: `grep` en `src/` sin tests y contract test; MSW solo en tests.
 
 ## 3. Cambios a aplicar
 
@@ -34,6 +36,19 @@ Esta fase migra las vistas al DTO real, resuelve los filtros en el servidor y el
 7. Borrar `src/productos.js`, `src/blogs.js` y `src/regiones.js` cuando ninguna vista los importe.
 8. Reemplazar el helper de presentación por `src/utils/producto.js` (DTO → props de vista), sin reconstruir el modelo legado.
 9. Crear tests de catálogo, filtros, blogs y selects.
+10. Endurecer el chequeo anti-mocks:
+    - `grep` de `msw`, `setupWorker` y `http.get/post/put/delete` en `KatEye-Front/src`, excluyendo tests;
+    - contract test del cliente real que falle si el runtime vuelve a MSW.
+11. Crear `docs/memoria/mm_devFase3.md` con los archivos creados y las acciones relevantes, en orden.
+12. Ejecutar `scripts/sync-progreso.sh` y dejar los espejos listos para el commit del usuario.
+
+### Gate
+
+1. Crear `scripts/gate-3.sh`:
+   - `set -euo pipefail` y `cd "$(git rev-parse --show-toplevel)"`;
+   - verificar el prerrequisito de G2; si falta, imprimir “Ejecuta primero scripts/gate-2.sh” y salir con código 2;
+   - ejecutar los tests de catálogo y el contract test;
+   - aplicar las dos capas anti-mocks: `grep -RInE '(msw|setupWorker|http\.(get|post|put|delete)\()' KatEye-Front/src --include='*.js' --include='*.jsx' --exclude='*.test.*'` (debe devolver vacío) y el contract test del cliente real. G3 falla si cualquiera de las dos capas falla.
 
 ## 4. Consecuencias
 
@@ -46,20 +61,32 @@ Esta fase migra las vistas al DTO real, resuelve los filtros en el servidor y el
 ## 5. Gate G3 — Evidencia
 
 ```bash
+cd TiendaKatEye
+scripts/gate-3.sh
+
 cd KatEye-Front
 
 npm run test:run -- catalogo filtros regiones blogs
+npm run test:run -- contract
 npm run build
 
-# No debe haber imports de mocks en vistas o contexto
-grep -rE "from ['\"].*/(productos|blogs|regiones)" src/views src/context src/components || true
+# Capa 1: MSW/HTTP en runtime, sin tests; `! grep` falla si encuentra algo
+! grep -RInE '(msw|setupWorker|http\.(get|post|put|delete)\()' src \
+  --include='*.js' --include='*.jsx' --exclude='*.test.*'
+
+# Capa 2: el contract test debe fallar si el runtime vuelve a MSW
+npm run test:run -- contract
 ```
 
 Resultado esperado:
 
 - Tests de catálogo, filtros, regiones/comunas y blogs en verde.
 - `npm run build` correcto.
+- El `grep` no encuentra MSW ni `http.*` en `src/` fuera de tests.
+- `scripts/gate-3.sh` verifica G2 y falla si aparece MSW en `src/` o si el contract test falla.
+- El contract test del cliente real está verde; si falla, G3 falla.
 - Sin imports de `productos.js`, `blogs.js` o `regiones.js` en vistas, contexto o componentes.
+- `docs/memoria/mm_devFase3.md` existe y describe los archivos y acciones.
 
 ## 6. Registro de ejecución
 
@@ -68,6 +95,7 @@ Resultado esperado:
 - **Comandos ejecutados:**
 - **Resultado:**
 - **Desviaciones:**
+- **Memoria:** `docs/memoria/mm_devFase3.md`
 - **Commit sugerido:** `refactor: migra catálogo, blogs y ubicación a la API`
 - **Commit realizado:**
 
@@ -76,3 +104,6 @@ Resultado esperado:
 - Confirmar que ningún test importa los módulos borrados.
 - Confirmar que el contrato de imagen de blog está documentado.
 - Verificar que los filtros se envían al servidor y no se recalculan en el cliente.
+- Confirmar que el `grep` anti-mocks no encuentra MSW ni `http.*` en `src/` fuera de tests.
+- Confirmar que el contract test falla si se reintroduce MSW en runtime (verificar manualmente y revertir).
+- Confirmar que los espejos recibieron los cambios de la fase.

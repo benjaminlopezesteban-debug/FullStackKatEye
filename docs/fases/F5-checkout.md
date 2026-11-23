@@ -19,7 +19,10 @@ Esta fase cierra el flujo de compra contra el backend, sin simulación local, y 
 - **D10:** el rechazo se fuerza en el backend con `KATEYE_PAGO_SIMULADO_RESULTADO=RECHAZADA` y `docker-compose.rechazo.yml`.
 - **D11:** checkout real en esta iteración; no queda checkout simulado.
 - **D17:** `Idempotency-Key` obligatoria en checkout y pago.
-- **D18:** el usuario commitea al cerrar la fase.
+- **D18:** el usuario commitea al cerrar la fase; B1 y B7 pueden ir en commits separados.
+- **D20:** al finalizar la fase se crea `docs/memoria/mm_devFase5.md`.
+- **D21:** `gate-5.sh` usa el override de rechazo y limpia el entorno con `trap`.
+- **D22:** los contract tests de checkout, pago y reintento son bloqueantes.
 
 ## 3. Cambios a aplicar
 
@@ -59,6 +62,10 @@ Esta fase cierra el flujo de compra contra el backend, sin simulación local, y 
 5. Eliminar `src/pedidos.js`, `src/pagos.js` local, `VITE_CHECKOUT_MODE` y la casilla `simularFallo`.
 6. Crear `docker-compose.rechazo.yml`.
 7. Crear tests de carrito, checkout, idempotencia, pago aprobado, rechazo y reintento.
+8. Crear contract tests de checkout, pago aprobado, pago rechazado y reintento contra el backend en modo test o mock server tipado.
+9. Crear `scripts/gate-5.sh` con `set -euo pipefail`, prerrequisito de G4, `trap 'docker compose down --remove-orphans' EXIT` y el override `docker compose -f docker-compose.yml -f docker-compose.rechazo.yml`.
+10. Crear `docs/memoria/mm_devFase5.md` con los archivos creados y las acciones relevantes, en orden.
+11. Ejecutar `scripts/sync-progreso.sh` y dejar los espejos listos para el commit del usuario.
 
 ## 4. Consecuencias
 
@@ -71,9 +78,13 @@ Esta fase cierra el flujo de compra contra el backend, sin simulación local, y 
 ## 5. Gate G5 — Evidencia
 
 ```bash
-cd KatEye-Front
+cd TiendaKatEye
 
+scripts/gate-5.sh
+
+cd KatEye-Front
 npm run test:run -- carrito checkout pago idempotencia
+npm run test:run -- contract
 npm run build
 
 cd ..
@@ -85,10 +96,13 @@ docker compose -f docker-compose.yml -f docker-compose.rechazo.yml up -d backend
 Resultado esperado:
 
 - Tests de carrito, checkout, pago y reintento en verde.
+- Contract tests de checkout, pago y reintento verdes.
 - Checkout aprobado con pedido real y carrito vacío.
 - Checkout rechazado con pedido existente y reintento funcional.
 - `Idempotency-Key` presente en las peticiones.
+- `gate-5.sh` usa el override y deja el entorno limpio con `trap`.
 - Sin imports de `pedidos.js` o `pagos.js` local.
+- `docs/memoria/mm_devFase5.md` existe y describe los archivos y acciones.
 
 ## 6. Registro de ejecución
 
@@ -97,6 +111,7 @@ Resultado esperado:
 - **Comandos ejecutados:**
 - **Resultado:**
 - **Desviaciones:**
+- **Memoria:** `docs/memoria/mm_devFase5.md`
 - **Commit sugerido:** `feat: integra carrito y checkout real con reintento de pago`
 - **Commit realizado:**
 
@@ -106,3 +121,4 @@ Resultado esperado:
 - Confirmar que el rechazo no crea un segundo pedido.
 - Verificar que el README documenta `docker-compose.rechazo.yml`.
 - Revisar que no queda ninguna referencia a `VITE_CHECKOUT_MODE`.
+- Confirmar que los espejos recibieron los cambios de la fase.
