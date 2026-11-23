@@ -6,7 +6,7 @@
 
 - **Base URL:** `/api/v1` (`VITE_API_URL` en desarrollo: `http://localhost:8080/api/v1`).
 - **Autenticación:** `Authorization: Bearer <JWT>` en los endpoints protegidos.
-- **Idempotencia:** `Idempotency-Key` obligatoria en `POST /checkout` y `POST /pagos/simular`; el reintento de pago reutiliza la clave del pedido.
+- **Idempotencia:** `Idempotency-Key` obligatoria en `POST /checkout`, `POST /pagos/simular` y `POST /pagos/{numero}/reintentar`. Cada operación usa su propia clave; el reintento reutiliza la clave solo si falla la red y genera otra tras un rechazo definitivo.
 - **Formato de error:** `ErrorResponse` con `timestamp`, `estado`, `error`, `mensaje` y `ruta`.
 - **Imágenes:** la API entrega `imagenUrl` en `ProductoResponse`; el frontend no reconstruye la URL.
 
@@ -52,11 +52,11 @@
 | `/auth/logout` | POST | Bearer JWT | `{ mensaje }` | `401` | `SesionProvider.test.jsx` | G4 |
 | `/usuarios/me` | GET | Bearer JWT | `UsuarioResponse` | `401` | `SesionProvider.test.jsx` | G4 |
 | `/contacto` | POST | `MensajeContactoRequest` (correo opcional) | `MensajeContactoResponse` | `400` | `Contacto.test.jsx` y `ValidacionRequestTest` | G4 |
-| `/carritos/validar` | POST | Ítems | Carrito validado | `400`, `409` | `carrito.validar.test.js` | G5 |
-| `/checkout` | POST | `CheckoutRequest` + `Idempotency-Key` | `CheckoutResponse` | `400`, `409` | `contract.checkout.test.js` | G5 |
-| `/pagos/simular` | POST | `PagoRequest` + `Idempotency-Key` | `PagoResponse` | `400`, `404` | `contract.pago.test.js` | G5 |
-| `/pagos/{numero}/reintentar` | POST | `numero` + `Idempotency-Key` | `PagoResponse` | `404`, `409` | `contract.pago-rechazado.test.js` | G5 |
-| `/pedidos/{numero}` | GET | `numero` | `PedidoResponse` | `404` | `contract.checkout.test.js` | G5 |
+| `/carritos/validar` | POST | Ítems | Carrito validado | `400`, `409` | No usado por el frontend actual (carrito local) | G5 (warning) |
+| `/checkout` | POST | `CheckoutRequest` + `Idempotency-Key` | `CheckoutResponse` | `400`, `409` | `Checkout.test.jsx` y `smoke-checkout.sh` | G5 |
+| `/pagos/simular` | POST | `PagoRequest` + `Idempotency-Key` | `PagoResponse` | `400`, `404` | `Checkout.test.jsx` y `smoke-checkout.sh` | G5 |
+| `/pagos/{numero}/reintentar` | POST | `numero` + `Idempotency-Key` | `PagoResponse` | `404`, `409` | `Checkout.test.jsx` y `smoke-checkout.sh` | G5 |
+| `/pedidos/{numero}` | GET | `numero` | `PedidoResponse` | `404` | `smoke-checkout.sh` (variante invitado) | G5 |
 
 Reglas:
 
@@ -92,6 +92,15 @@ curl -i -X OPTIONS http://localhost:8080/api/v1/productos \
 - **Mitigación de XSS:** React escapa el contenido, no se usa `dangerouslySetInnerHTML` con datos del backend, Nginx aplica CSP y el token no viaja en la URL.
 - **Fuera de esta iteración:** cookie `httpOnly`, refresh token y revocación de sesión.
 
-## 5. OpenAPI
+## 5. Flujo de compra
+
+1. `POST /checkout` crea el pedido en `PENDIENTE_PAGO`, reserva stock y devuelve `pedidoId` y `numero`.
+2. El carrito se vacía **solo** cuando `POST /checkout` responde 2xx.
+3. `POST /pagos/simular` decide el resultado: `APROBADA` deja el pedido pagado; `RECHAZADA` lo deja en `PAGO_RECHAZADO` sin borrar el pedido.
+4. Ante rechazo, `POST /pagos/{numero}/reintentar` reabre el mismo pedido y reserva stock otra vez; no se crea un pedido nuevo.
+5. `docker-compose.rechazo.yml` fuerza `KATEYE_PAGO_SIMULADO_RESULTADO=RECHAZADA` para demostrar el rechazo y el reintento.
+6. `scripts/smoke-checkout.sh` verifica el flujo rechazado y el reintento contra el backend en Docker.
+
+## 6. OpenAPI
 
 Si es viable, `docs/openapi.yaml` se genera en F6 y se valida en `gate-2.sh` con `schemathesis`, `dredd` o equivalente. Si no es viable, esta sección deja el TODO explícito y la matriz sigue siendo la referencia de cobertura.

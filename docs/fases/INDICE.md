@@ -11,7 +11,7 @@ Cada fase produce además `docs/memoria/mm_devFaseX.md`, la memoria del desarrol
 | F2 | [F2-rebanada-vertical.md](F2-rebanada-vertical.md) | `../memoria/mm_devFase2.md` | G2 | Cerrada (commit pendiente) |
 | F3 | [F3-catalogo.md](F3-catalogo.md) | `../memoria/mm_devFase3.md` | G3 | Cerrada (commit pendiente) |
 | F4 | [F4-sesion.md](F4-sesion.md) | `../memoria/mm_devFase4.md` | G4 | Cerrada (commit pendiente) |
-| F5 | [F5-checkout.md](F5-checkout.md) | `../memoria/mm_devFase5.md` | G5 | Planificada |
+| F5 | [F5-checkout.md](F5-checkout.md) | `../memoria/mm_devFase5.md` | G5 | Cerrada (commit pendiente) |
 | F6 | [F6-release.md](F6-release.md) | `../memoria/mm_devFase6.md` | G6 | Planificada |
 
 ## Scripts transversales y correcciones

@@ -4,7 +4,7 @@
 |---|---|
 | **Fase** | F5 |
 | **Gate** | G5 |
-| **Estado** | Planificada |
+| **Estado** | Cerrada (commit pendiente) |
 | **Documento maestro** | `../../planificacion_desarrollo.md` |
 
 ## 1. Contexto
@@ -100,20 +100,21 @@ Resultado esperado:
 - Checkout aprobado con pedido real y carrito vacío.
 - Checkout rechazado con pedido existente y reintento funcional.
 - `Idempotency-Key` presente en las peticiones.
-- `gate-5.sh` usa el override y deja el entorno limpio con `trap`.
+- `gate-5.sh` usa el override y deja el entorno limpio con `trap`; el smoke real crea pedido, rechaza pago y reintenta.
 - Sin imports de `pedidos.js` o `pagos.js` local.
+- `scripts/check-deuda.sh 5` no reporta deuda vencida para F5.
 - `docs/memoria/mm_devFase5.md` existe y describe los archivos y acciones.
 
 ## 6. Registro de ejecución
 
-- **Fecha:**
-- **Autor:**
-- **Comandos ejecutados:**
-- **Resultado:**
-- **Desviaciones:**
+- **Fecha:** 2026-11-22
+- **Autor:** Benjamín López
+- **Comandos ejecutados:** `mvn test`; `npm run test:coverage`; `scripts/check-deuda.sh 5`; `scripts/gate-5.sh`; `scripts/sync-progreso.sh`.
+- **Resultado:** G5 en verde (`exit 0`). 111 tests de frontend verdes, cobertura 87.50/70.35/79.76/85.26, build correcto y smoke Docker con pedido rechazado + reintento. Evidencia en `.gates/gate-5.ok`.
+- **Desviaciones:** se corrigió el bloqueo PostgreSQL por `GET_LOCK` de MySQL; el formulario fija `DESPACHO` y no ofrece `RETIRO`; imágenes, OpenAPI, linter backend, Prettier global, N+1 y correo de contacto `NOT NULL` quedan para F6.
 - **Memoria:** `docs/memoria/mm_devFase5.md`
 - **Commit sugerido:** `feat: integra carrito y checkout real con reintento de pago`
-- **Commit realizado:**
+- **Commit realizado:** pendiente (lo realiza el usuario)
 
 ## 7. Pendientes para la siguiente fase
 
